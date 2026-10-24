@@ -73,3 +73,11 @@ The 5-minute "it works" test above was wrong: the process stayed alive, but the 
 - In game: Options -> Graphics -> Display Mode = "Windowed (Fullscreen)" / borderless, then quit normally so it saves.
 - Optional, for best performance: Legion Space -> GPU Working Mode = dGPU (reboot) so the panel runs directly on the RTX 5090;
   exclusive fullscreen should then work too.
+
+## Follow-up (2026-10-24 ~18:50)
+- Found the controller link: the game was stuck on the **Gamepad control scheme** (set while the PS controller
+  was connected) and kept showing "You do not have a Gamepad attached. Switch to Mouse and Keyboard?".
+  Answered Yes, so the game now uses mouse and keyboard.
+- Setting Display Mode to windowed in the menu did not survive a relaunch; the flicker came back.
+- Chosen permanent fix: Legion Space -> GPU Working Mode = **dGPU** (reboot), so the internal panel is driven
+  directly by the RTX 5090 and there is no cross-GPU copy. Workaround until then: Alt+Enter after each launch.
