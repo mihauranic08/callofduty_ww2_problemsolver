@@ -1,4 +1,4 @@
-# Call of Duty: WWII — crash diagnosis (2026-10-24)
+﻿# Call of Duty: WWII â€” crash diagnosis (2026-10-24)
 
 ## System
 - CPU: Intel Core Ultra 9 275HX (24 cores / 24 threads)
@@ -39,3 +39,18 @@
 - Limit CPU affinity (e.g. to P-cores only) in case of a high-core-count issue in the old engine.
 - Steam -> Verify integrity of game files.
 - Analyse the crash dump `%LOCALAPPDATA%\CrashDumps\s2_mp64_ship.exe.22196.dmp` with WinDbg (`!analyze -v`).
+
+## Follow-up verification (2026-10-24)
+- Registry: `HKCU\Software\Microsoft\DirectX\UserGpuPreferences` still has `GpuPreference=2;` for both `s2_sp64_ship.exe` and `s2_mp64_ship.exe` (High performance).
+- Service: `NahimicService` is `Stopped`, startup mode `Disabled`.
+- Application log: no matching Event 1000/1001 crashes dated 2026-10-24 or later. The newest matching records are MP on 2026-10-20 01:33:21 and SP on 2026-10-19 21:36:10. Thus there is no post-change crash record to compare yet. The older records remain consistent with the original pattern: MP `ntdll.dll`, exception `0xc0000005`, offset `0x1a12d` (three archived reports); SP `s2_sp64_ship.exe`, exception `0xc0000005`, offset `0xf2af90a` (one archived report).
+- WER archive: all four readable game reports are dated 2026-10-19/20, before the 2026-10-24 changes. They still list Intel D3D11 modules (`igd10umt64xe.DLL`, `igc64.dll`) and A-Volute/Nahimic modules (`AudioDevProps2.dll`, `ASM.Plugin.AudioDevProps2.dll`, `ProductInfo.dll`); these reports do not list `nvwgf2umx.dll`. They cannot establish which GPU or injected modules are used after the changes. Some unrelated WER report files denied access in this user session.
+- Next steps: no additional change from the 'If it still crashes, try next' list was applied because no crash newer than the changes is recorded. If a new crash occurs, first test with Steam Overlay disabled (reversible), then check NVIDIA Control Panel per-program GPU assignment and test on the external NVIDIA-connected display. These isolate overlay and Optimus routing without modifying game files. The remaining listed actions (MUX/dGPU-only, uninstalling Nahimic, CPU affinity, Steam file verification, dump analysis) are not performed; no software was uninstalled and no game files were changed.
+
+
+## Launch test after fixes (2026-10-24 18:28)
+- Launched SP (`s2_sp64_ship.exe`) via Steam and monitored for 5 minutes.
+- NVIDIA D3D driver (`nvwgf2umx.dll`) is now loaded (Intel driver also present; normal on Optimus since the internal panel is attached to the iGPU).
+- No Nahimic/A-Volute modules injected.
+- Process stayed alive and responsive for 300 s (previous launches today exited after 25-45 s); no new Application Error / Hang events.
+- Result: fixes appear to resolve the crash. Multiplayer not yet tested.
