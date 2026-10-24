@@ -81,3 +81,24 @@ The 5-minute "it works" test above was wrong: the process stayed alive, but the 
 - Setting Display Mode to windowed in the menu did not survive a relaunch; the flicker came back.
 - Chosen permanent fix: Legion Space -> GPU Working Mode = **dGPU** (reboot), so the internal panel is driven
   directly by the RTX 5090 and there is no cross-GPU copy. Workaround until then: Alt+Enter after each launch.
+
+## FINAL FIX - flicker solved (2026-10-24, after reboot)
+Tests after switching Legion Space to dGPU mode (panel now driven by the RTX 5090):
+- dGPU mode alone: still flickered -> cross-GPU copy was NOT the cause.
+- Focus-stealing check (foreground sampled every 40 ms for 35 s): game kept focus -> not the cause.
+- Panel at 60 Hz instead of 240 Hz: still flickered -> refresh rate / VRR not the cause. Restored to 240 Hz.
+- **Disabled Windows fullscreen optimizations + high-DPI override -> no flicker. This is the fix.**
+
+Setting (HKCU, per-exe, reversible):
+`HKCU\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers`
+= `~ DISABLEDXMAXIMIZEDWINDOWEDMODE HIGHDPIAWARE` for `s2_sp64_ship.exe` and `s2_mp64_ship.exe`
+(same as exe Properties -> Compatibility -> "Disable fullscreen optimizations" + "Override high DPI scaling: Application").
+Revert: delete those two values.
+
+### Summary of everything that is in place now
+1. GPU preference High performance for both exes (game runs on the RTX 5090).
+2. NahimicService disabled (no more Nahimic injection).
+3. Game control scheme switched from Gamepad to Mouse & Keyboard (leftover from the PS controller).
+4. Fullscreen optimizations disabled + DPI override for both exes (fixes flicker).
+5. Legion Space GPU mode = dGPU (optional now; Hybrid may also work with fix 4).
+6. XBOX Synthetic Gamepad Bus disabled (not the cause; can be re-enabled).
