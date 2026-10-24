@@ -54,3 +54,22 @@
 - No Nahimic/A-Volute modules injected.
 - Process stayed alive and responsive for 300 s (previous launches today exited after 25-45 s); no new Application Error / Hang events.
 - Result: fixes appear to resolve the crash. Multiplayer not yet tested.
+
+## Correction + real fix (2026-10-24 ~19:00)
+The 5-minute "it works" test above was wrong: the process stayed alive, but the screen was black.
+- Symptom (user): splash/logo, then black screen; after a settings reset, the whole screen flashes.
+- Root cause: exclusive fullscreen across GPUs. The game renders on the RTX 5090 but the 240 Hz internal
+  Lenovo panel (HDR supported, HDR off) is wired to the Intel iGPU (Optimus), so frames are copied across adapters.
+- Confirmed: Alt+Enter -> windowed mode = no flicker, game works.
+
+### Changes made in this round
+- `players2\system_config.cfg` and `system_config_mp.cfg` renamed to `*.bak` (video settings reset).
+  Full backup of `players2` is in `backup/players2_2026-10-24/` (local only, not committed).
+- `XBOX Synthetic Gamepad Bus` (SWD\SYNTHETICGAMEPADENUM\SYNTHETICGAMEPAD0, installed 2026-10-24 17:00
+  by Xbox Gaming Services/GameInput) disabled while chasing a phantom controller. It turned out not to be
+  the cause. Re-enable (admin): `Enable-PnpDevice -InstanceId 'SWD\SYNTHETICGAMEPADENUM\SYNTHETICGAMEPAD0'`
+
+### Permanent fix
+- In game: Options -> Graphics -> Display Mode = "Windowed (Fullscreen)" / borderless, then quit normally so it saves.
+- Optional, for best performance: Legion Space -> GPU Working Mode = dGPU (reboot) so the panel runs directly on the RTX 5090;
+  exclusive fullscreen should then work too.
